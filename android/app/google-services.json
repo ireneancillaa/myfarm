@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "254143810702",
+    "project_id": "myfarm-ea0f2",
+    "storage_bucket": "myfarm-ea0f2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:254143810702:android:2fae41c9dadae9fd338ddf",
+        "android_client_info": {
+          "package_name": "com.example.myfarm"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyABmnz_v4dRNpv2FxScPOk0XxrOUGHhcZc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:254143810702:android:a577a73aceaa4b7c338ddf",
+        "android_client_info": {
+          "package_name": "id.co.cp.myfarm"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyABmnz_v4dRNpv2FxScPOk0XxrOUGHhcZc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
