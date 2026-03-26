@@ -334,7 +334,7 @@ class _SummaryPageState extends State<SummaryPage> {
   }
 
   String _getCode(Map<String, dynamic> item) {
-    final key = widget.isMorta ? 'mortaCode' : 'feedCode';
+    final key = widget.isMorta ? 'jenis' : 'feedCode';
     return item[key]?.toString() ?? '-';
   }
 }
