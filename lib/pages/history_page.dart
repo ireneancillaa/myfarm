@@ -5,7 +5,6 @@ import '../controller/history_controller.dart';
 import '../controller/feed_use_controller.dart';
 import '../controller/draft_controller.dart';
 import '../controller/morta_controller.dart';
-import 'summary_page.dart';
 
 class HistoryPage extends StatefulWidget {
   final bool isMorta;

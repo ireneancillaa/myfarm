@@ -6,7 +6,6 @@ import '../controller/morta_controller.dart';
 import '../controller/draft_controller.dart';
 import '../services/pdf_service.dart';
 import 'feed_use_view.dart';
-import 'morta_calculator_view.dart';
 import 'pdf_preview_page.dart';
 
 class SummaryPage extends StatefulWidget {
