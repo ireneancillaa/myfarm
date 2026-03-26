@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:myfarm/pages/feed_use_view.dart';
-import 'services/feed_data_migration.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -11,7 +10,6 @@ void main() async {
   try {
     await GetStorage.init();
     await Firebase.initializeApp();
-    await migrateOldFeedDataToHistory();
     runApp(const MyApp());
   } catch (e) {
     debugPrint("FIREBASE INIT ERROR: $e");

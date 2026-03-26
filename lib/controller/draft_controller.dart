@@ -1,8 +1,13 @@
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
-class FeedDraftController extends GetxController {
-  void removeDraftItem(Map<String, dynamic> item) {
+class DraftController extends GetxController {
+  bool get canDeleteDraft => boxDraft.read('canDeleteDraft') == true;
+
+  bool removeDraftItem(Map<String, dynamic> item) {
+    if (boxDraft.read('canDeleteDraft') == false) {
+      return false;
+    }
     final list = draftHistory;
     list.removeWhere((h) {
       final t1 = h['timestamp']?.toString();
@@ -14,7 +19,9 @@ class FeedDraftController extends GetxController {
       return t1 == t2 && k1 == k2 && f1 == f2;
     });
     boxDraft.write('draftHistory', list);
+    boxDraft.write('canDeleteDraft', false);
     update();
+    return true;
   }
 
   final boxDraft = GetStorage('draft');
@@ -26,6 +33,7 @@ class FeedDraftController extends GetxController {
 
   void clearDraftHistory() {
     boxDraft.remove('draftHistory');
+    boxDraft.remove('canDeleteDraft');
     update();
   }
 }

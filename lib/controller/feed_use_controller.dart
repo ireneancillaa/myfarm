@@ -4,10 +4,8 @@ import '../services/feed_code_service.dart';
 import 'package:get_storage/get_storage.dart';
 
 class FeedUseController extends GetxController {
-  // Simpan draft timbang lokal sebelum submit ke Firebase
   final boxDraft = GetStorage('draft');
 
-  // Ambil draft timbang lokal
   List<Map<String, dynamic>> get draftHistory {
     final list = boxDraft.read<List>('draftHistory') ?? [];
     return List<Map<String, dynamic>>.from(list);
@@ -22,13 +20,13 @@ class FeedUseController extends GetxController {
     final list = draftHistory;
     list.add(newDraft);
     boxDraft.write('draftHistory', list);
+    boxDraft.write('canDeleteDraft', true);
   }
 
   void clearDraftHistory() {
     boxDraft.remove('draftHistory');
   }
 
-  // Simpan ke draft, bukan ke Firebase
   Future<void> saveFeedUseDraft() async {
     if (selectedFeedCode.value.isEmpty || kilo.value.isEmpty) {
       Get.snackbar('Gagal', 'Feed code dan kilo harus diisi');
@@ -38,7 +36,6 @@ class FeedUseController extends GetxController {
     Get.snackbar('Sukses', 'Data timbang berhasil ditambahkan');
   }
 
-  // Submit semua draft ke Firebase
   Future<void> submitDraftToFirebase() async {
     final drafts = draftHistory;
     if (drafts.isEmpty) {
@@ -70,6 +67,7 @@ class FeedUseController extends GetxController {
   final box = GetStorage();
 
   var kilo = ''.obs;
+  var draftCount = 0.obs;
   var avg = 0.0.obs;
   var feedCodes = <String>[].obs;
   var selectedFeedCode = ''.obs;
@@ -110,6 +108,15 @@ class FeedUseController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    draftCount.value = draftHistory.length;
+    boxDraft.listenKey('draftHistory', (value) {
+      if (value != null) {
+        draftCount.value = (value as List).length;
+      } else {
+        draftCount.value = 0;
+      }
+    });
+
     final savedCodes = box.read<List>('feedCodes');
     if (savedCodes != null) {
       feedCodes.assignAll(savedCodes.cast<String>());

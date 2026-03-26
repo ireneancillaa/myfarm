@@ -1,8 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:rxdart/rxdart.dart';
 
-class FeedHistoryController extends GetxController {
+class HistoryController extends GetxController {
   // Stream untuk semua feedCode (all history)
   Stream<List<Map<String, dynamic>>> get allHistoryStream {
     return FirebaseFirestore.instance.collection('data').snapshots().map((
@@ -21,7 +22,55 @@ class FeedHistoryController extends GetxController {
           }
         }
       }
-      // Urutkan berdasarkan timestamp descending (terbaru di atas)
+      all.sort((a, b) {
+        final tA = DateTime.tryParse(a['timestamp'] ?? '') ?? DateTime(0);
+        final tB = DateTime.tryParse(b['timestamp'] ?? '') ?? DateTime(0);
+        return tB.compareTo(tA);
+      });
+      return all;
+    });
+  }
+
+  Stream<List<Map<String, dynamic>>> get allMortaHistoryStream {
+    // Listen ke subcollection morta (Type 1 & Type 2) di bawah Feed 1
+    final type1Stream = FirebaseFirestore.instance
+        .collection('data')
+        .doc('Feed 1')
+        .collection('morta')
+        .doc('Type 1')
+        .snapshots();
+    final type2Stream = FirebaseFirestore.instance
+        .collection('data')
+        .doc('Feed 1')
+        .collection('morta')
+        .doc('Type 2')
+        .snapshots();
+
+    return CombineLatestStream.combine2(type1Stream, type2Stream, (
+      type1Snap,
+      type2Snap,
+    ) {
+      final List<Map<String, dynamic>> all = [];
+      // Type 1 (morta)
+      if (type1Snap.exists && type1Snap.data() != null) {
+        final data = type1Snap.data()!;
+        final List<dynamic> history = data['history'] ?? [];
+        for (final h in history) {
+          if (h is Map<String, dynamic>) {
+            all.add({...h, 'jenis': 'Morta'});
+          }
+        }
+      }
+      // Type 2 (cull)
+      if (type2Snap.exists && type2Snap.data() != null) {
+        final data = type2Snap.data()!;
+        final List<dynamic> history = data['history'] ?? [];
+        for (final h in history) {
+          if (h is Map<String, dynamic>) {
+            all.add({...h, 'jenis': 'Cull'});
+          }
+        }
+      }
       all.sort((a, b) {
         final tA = DateTime.tryParse(a['timestamp'] ?? '') ?? DateTime(0);
         final tB = DateTime.tryParse(b['timestamp'] ?? '') ?? DateTime(0);
@@ -45,18 +94,15 @@ class FeedHistoryController extends GetxController {
     final List<dynamic> history = List.from(data['history'] ?? []);
 
     // cari item yang benar-benar sama
-    final target = history.firstWhere(
-      (h) {
-        final t1 = h['timestamp']?.toString();
-        final t2 = item['timestamp']?.toString();
+    final target = history.firstWhere((h) {
+      final t1 = h['timestamp']?.toString();
+      final t2 = item['timestamp']?.toString();
 
-        final k1 = h['kilo']?.toString();
-        final k2 = item['kilo']?.toString();
+      final k1 = h['kilo']?.toString();
+      final k2 = item['kilo']?.toString();
 
-        return t1 == t2 && k1 == k2;
-      },
-      orElse: () => null,
-    );
+      return t1 == t2 && k1 == k2;
+    }, orElse: () => null);
 
     if (target == null) return;
     debugPrint('DELETE TARGET: $target');
@@ -67,7 +113,7 @@ class FeedHistoryController extends GetxController {
   }
 
   final String feedCode;
-  FeedHistoryController(this.feedCode);
+  HistoryController(this.feedCode);
 
   Stream<List<Map<String, dynamic>>> get historyStream {
     return FirebaseFirestore.instance
