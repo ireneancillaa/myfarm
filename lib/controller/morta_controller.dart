@@ -68,7 +68,6 @@ class MortaController extends GetxController {
       final mortaCode = draft['mortaCode'] ?? '';
       final ekor = draft['ekor'] ?? '';
       final timestamp = draft['timestamp'] ?? DateTime.now().toIso8601String();
-      // Tentukan type berdasarkan mortaCode
       String typeCollection = '';
       Map<String, dynamic> dataToAdd = {'ekor': ekor, 'timestamp': timestamp};
       if (mortaCode.toUpperCase() == 'MORT') {
@@ -77,10 +76,9 @@ class MortaController extends GetxController {
         typeCollection = 'Type 2';
         dataToAdd['jenis'] = 'Cull';
       } else {
-        continue; // skip jika bukan morta/cull
+        continue;
       }
       try {
-        // Cari dokumen morta pada koleksi sesuai type
         final docRef = FirebaseFirestore.instance
             .collection('data')
             .doc('Feed 1')
@@ -90,7 +88,8 @@ class MortaController extends GetxController {
           'history': FieldValue.arrayUnion([dataToAdd]),
         }, SetOptions(merge: true));
       } catch (e) {
-        // Bisa tambahkan log error jika perlu
+        Get.snackbar('Error', 'Gagal menyimpan data ke Firebase: $e');
+        return;
       }
     }
     clearDraftHistory();

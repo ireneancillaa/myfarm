@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 import 'package:rxdart/rxdart.dart';
 
 class HistoryController extends GetxController {
-  // Stream untuk semua feedCode (all history)
   Stream<List<Map<String, dynamic>>> get allHistoryStream {
     return FirebaseFirestore.instance.collection('data').snapshots().map((
       query,
@@ -32,7 +31,6 @@ class HistoryController extends GetxController {
   }
 
   Stream<List<Map<String, dynamic>>> get allMortaHistoryStream {
-    // Listen ke subcollection morta (Type 1 & Type 2) di bawah Feed 1
     final type1Stream = FirebaseFirestore.instance
         .collection('data')
         .doc('Feed 1')
@@ -51,7 +49,6 @@ class HistoryController extends GetxController {
       type2Snap,
     ) {
       final List<Map<String, dynamic>> all = [];
-      // Type 1 (morta)
       if (type1Snap.exists && type1Snap.data() != null) {
         final data = type1Snap.data()!;
         final List<dynamic> history = data['history'] ?? [];
@@ -61,7 +58,6 @@ class HistoryController extends GetxController {
           }
         }
       }
-      // Type 2 (cull)
       if (type2Snap.exists && type2Snap.data() != null) {
         final data = type2Snap.data()!;
         final List<dynamic> history = data['history'] ?? [];
@@ -93,7 +89,6 @@ class HistoryController extends GetxController {
     final data = query.docs.first.data();
     final List<dynamic> history = List.from(data['history'] ?? []);
 
-    // cari item yang benar-benar sama
     final target = history.firstWhere((h) {
       final t1 = h['timestamp']?.toString();
       final t2 = item['timestamp']?.toString();

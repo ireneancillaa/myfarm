@@ -98,7 +98,6 @@ class PdfService {
             }
           }
 
-          // ---- CETAKAN HARIAN (TETAP 2 KOLOM) ----
           return pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.center,
             mainAxisSize: pw.MainAxisSize.min,
@@ -134,11 +133,10 @@ class PdfService {
               _buildMetaRow('Tgl. DOC In', '-'),
               _buildMetaRow('Doc In', isMorta ? '0' : '0.0'),
               _buildMetaRow('Umur', '1 HARI'),
+
               pw.SizedBox(height: 4),
               pw.Divider(borderStyle: pw.BorderStyle.dashed),
               pw.SizedBox(height: 4),
-
-              // HEADER 2 KOLOM
               pw.Row(
                 children: [
                   pw.Expanded(child: _buildHeaderRow(isMorta)),
@@ -147,8 +145,6 @@ class PdfService {
                 ],
               ),
               pw.SizedBox(height: 4),
-
-              // PEMBAGIAN DATA OTOMATIS KIRI KANAN
               () {
                 final leftCount = (items.length + 1) ~/ 2;
                 return pw.Row(
@@ -244,14 +240,6 @@ class PdfService {
                         fontStyle: pw.FontStyle.italic,
                       ),
                     ),
-                    pw.Text(
-                      'TP1A.220624.014',
-                      style: pw.TextStyle(
-                        fontSize: 9,
-                        color: PdfColors.grey500,
-                        fontStyle: pw.FontStyle.italic,
-                      ),
-                    ),
                   ],
                 ),
               ),
@@ -264,7 +252,6 @@ class PdfService {
     return pdf.save();
   }
 
-  // ---- WIDGET ALL SUMMARY MORTALITY (DIKEMBALIKAN KE 1 KOLOM) ----
   static pw.Widget _buildMortaAllSummary(
     List<Map<String, dynamic>> items,
     double totalValue,
@@ -322,7 +309,6 @@ class PdfService {
         pw.Divider(borderStyle: pw.BorderStyle.dashed),
         pw.SizedBox(height: 4),
 
-        // HEADER 1 KOLOM
         pw.Row(
           mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
           children: [
@@ -377,7 +363,6 @@ class PdfService {
         ),
         pw.SizedBox(height: 4),
 
-        // DATA 1 KOLOM (DENGAN GROUPING TANGGAL)
         ...sortedDates.asMap().entries.map((entry) {
           final idx = entry.key;
           final date = entry.value;
@@ -497,7 +482,6 @@ class PdfService {
     );
   }
 
-  // ---- WIDGET ALL SUMMARY FEED (DIKEMBALIKAN KE 1 KOLOM) ----
   static pw.Widget _buildFeedAllSummary(
     List<Map<String, dynamic>> items,
     double totalValue,
@@ -560,7 +544,6 @@ class PdfService {
         pw.Divider(borderStyle: pw.BorderStyle.dashed),
         pw.SizedBox(height: 4),
 
-        // HEADER 1 KOLOM
         pw.Row(
           mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
           children: [
@@ -627,7 +610,6 @@ class PdfService {
         ),
         pw.SizedBox(height: 4),
 
-        // DATA 1 KOLOM (DENGAN GROUPING TANGGAL)
         ...sortedDates.asMap().entries.map((entry) {
           final idx = entry.key;
           final date = entry.value;
@@ -760,7 +742,6 @@ class PdfService {
     );
   }
 
-  // ---- HELPER UMUM ----
   static pw.Widget _buildMetaRow(String label, String value) {
     final isPdfStatus = label == 'PDF Status';
     final isOffline = isPdfStatus && value.toLowerCase().contains('offline');
@@ -798,7 +779,6 @@ class PdfService {
     );
   }
 
-  // ---- HELPER TABEL HARIAN (2 KOLOM) ----
   static pw.Widget _buildHeaderRow(bool isMorta) {
     final style = pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold);
     if (isMorta) {
