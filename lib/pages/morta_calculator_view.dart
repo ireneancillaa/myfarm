@@ -21,10 +21,15 @@ class MortaCalculatorView extends StatelessWidget {
         children: [
           Row(
             children: [
-              Obx(() => Text(
-                "Morta Ke - ${controller.draftCount.value + 1}",
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              )),
+              Obx(
+                () => Text(
+                  "Morta Ke - ${controller.draftCount.value + 1}",
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 12),
@@ -50,24 +55,24 @@ class MortaCalculatorView extends StatelessWidget {
             ),
             alignment: Alignment.center,
             child: Obx(() {
-              final codes = controller.mortaCodes;
-              final selected = controller.selectedMortaCode.value;
-              if (codes.isNotEmpty && selected.isEmpty) {
-                controller.selectedMortaCode.value = codes.first;
+              final jenisList = controller.jenisList;
+              final selected = controller.selectedJenis.value;
+              if (jenisList.isNotEmpty && selected.isEmpty) {
+                controller.selectedJenis.value = jenisList.first;
               }
-              if (codes.isEmpty) {
-                return const Center(child: Text("No Feed Codes"));
+              if (jenisList.isEmpty) {
+                return const Center(child: Text("No Jenis"));
               }
               return Row(
                 children: [
-                  for (int i = 0; i < codes.length; i++) ...[
+                  for (int i = 0; i < jenisList.length; i++) ...[
                     Expanded(
                       child: GestureDetector(
-                        onTap: () => controller.selectMortaCode(codes[i]),
+                        onTap: () => controller.selectJenis(jenisList[i]),
                         child: Container(
                           padding: const EdgeInsets.symmetric(vertical: 6),
                           decoration: BoxDecoration(
-                            color: selected == codes[i]
+                            color: selected == jenisList[i]
                                 ? const Color(0xFF6B4AC3)
                                 : Colors.white,
                             borderRadius: BorderRadius.circular(8),
@@ -78,10 +83,10 @@ class MortaCalculatorView extends StatelessWidget {
                           ),
                           alignment: Alignment.center,
                           child: Text(
-                            codes[i],
+                            jenisList[i],
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              color: selected == codes[i]
+                              color: selected == jenisList[i]
                                   ? Colors.white
                                   : const Color(0xFF6B4AC3),
                               fontWeight: FontWeight.bold,
@@ -91,7 +96,7 @@ class MortaCalculatorView extends StatelessWidget {
                         ),
                       ),
                     ),
-                    if (i < codes.length - 1) const SizedBox(width: 8),
+                    if (i < jenisList.length - 1) const SizedBox(width: 8),
                   ],
                 ],
               );
@@ -134,12 +139,12 @@ class MortaCalculatorView extends StatelessWidget {
                 flex: 1,
                 child: GestureDetector(
                   onTap: () {
-                    if (controller.selectedMortaCode.value.isNotEmpty) {
+                    if (controller.selectedJenis.value.isNotEmpty) {
                       Get.to(() => const HistoryPage(isMorta: true));
                     } else {
                       Get.snackbar(
-                        'Pilih MortaCode',
-                        'Silakan pilih morta code terlebih dahulu',
+                        'Pilih Jenis',
+                        'Silakan pilih jenis terlebih dahulu',
                       );
                     }
                   },

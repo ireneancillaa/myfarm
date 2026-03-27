@@ -12,9 +12,9 @@ class MortaController extends GetxController {
     return List<Map<String, dynamic>>.from(list);
   }
 
-  void addDraftHistory(String mortaCode, String ekor) {
+  void addDraftHistory(String jenis, String ekor) {
     final newDraft = {
-      'mortaCode': mortaCode,
+      'jenis': jenis,
       'ekor': ekor,
       'timestamp': DateTime.now().toIso8601String(),
     };
@@ -39,9 +39,9 @@ class MortaController extends GetxController {
       final t2 = item['timestamp']?.toString();
       final e1 = h['ekor']?.toString();
       final e2 = item['ekor']?.toString();
-      final m1 = h['mortaCode']?.toString();
-      final m2 = item['mortaCode']?.toString();
-      return t1 == t2 && e1 == e2 && m1 == m2;
+      final j1 = h['jenis']?.toString();
+      final j2 = item['jenis']?.toString();
+      return t1 == t2 && e1 == e2 && j1 == j2;
     });
     boxDraft.write('draftHistory', list);
     boxDraft.write('canDeleteDraft', false);
@@ -50,11 +50,11 @@ class MortaController extends GetxController {
   }
 
   Future<void> saveMortaDraft() async {
-    if (selectedMortaCode.value.isEmpty || ekor.value.isEmpty) {
-      Get.snackbar('Gagal', 'Morta code dan ekor harus diisi');
+    if (selectedJenis.value.isEmpty || ekor.value.isEmpty) {
+      Get.snackbar('Gagal', 'Jenis dan ekor harus diisi');
       return;
     }
-    addDraftHistory(selectedMortaCode.value, ekor.value);
+    addDraftHistory(selectedJenis.value, ekor.value);
     Get.snackbar('Sukses', 'Data morta berhasil ditambahkan');
   }
 
@@ -65,14 +65,14 @@ class MortaController extends GetxController {
       return;
     }
     for (final draft in drafts) {
-      final mortaCode = draft['mortaCode'] ?? '';
+      final jenis = draft['jenis'] ?? '';
       final ekor = draft['ekor'] ?? '';
       final timestamp = draft['timestamp'] ?? DateTime.now().toIso8601String();
       String typeCollection = '';
       Map<String, dynamic> dataToAdd = {'ekor': ekor, 'timestamp': timestamp};
-      if (mortaCode.toUpperCase() == 'MORT') {
+      if (jenis.toUpperCase() == 'MORT') {
         typeCollection = 'Type 1';
-      } else if (mortaCode.toUpperCase() == 'CULL') {
+      } else if (jenis.toUpperCase() == 'CULL') {
         typeCollection = 'Type 2';
         dataToAdd['jenis'] = 'Cull';
       } else {
@@ -100,8 +100,8 @@ class MortaController extends GetxController {
 
   var ekor = ''.obs;
   var draftCount = 0.obs;
-  var mortaCodes = <String>['MORT', 'CULL'].obs;
-  var selectedMortaCode = ''.obs;
+  var jenisList = <String>['MORT', 'CULL'].obs;
+  var selectedJenis = ''.obs;
 
   void addEkor(String value) {
     if (value == '.' && ekor.value.contains('.')) return;
@@ -130,16 +130,16 @@ class MortaController extends GetxController {
       }
     });
 
-    final savedSelected = box.read('selectedMortaCode');
+    final savedSelected = box.read('selectedJenis');
     if (savedSelected != null) {
-      selectedMortaCode.value = savedSelected;
-    } else if (mortaCodes.isNotEmpty) {
-      selectedMortaCode.value = mortaCodes.first;
+      selectedJenis.value = savedSelected;
+    } else if (jenisList.isNotEmpty) {
+      selectedJenis.value = jenisList.first;
     }
   }
 
-  void selectMortaCode(String code) {
-    selectedMortaCode.value = code;
-    box.write('selectedMortaCode', code);
+  void selectJenis(String jenis) {
+    selectedJenis.value = jenis;
+    box.write('selectedJenis', jenis);
   }
 }

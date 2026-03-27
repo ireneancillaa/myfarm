@@ -45,7 +45,7 @@ class _HistoryPageState extends State<HistoryPage> {
 
     final totalTimbang = draftHistory.length;
     final valueKey = widget.isMorta ? 'ekor' : 'kilo';
-    final codeKey = widget.isMorta ? 'mortaCode' : 'feedCode';
+    final codeKey = widget.isMorta ? 'jenis' : 'feedCode';
     final labelQty = widget.isMorta ? 'EKOR' : 'KILO';
     final labelCode = widget.isMorta ? 'ALASAN' : 'PROD';
     final title = widget.isMorta ? 'Riwayat Morta' : 'Riwayat Feed';
