@@ -7,7 +7,8 @@ import 'morta_calculator_view.dart';
 import 'summary_page.dart';
 
 class FeedUseView extends StatefulWidget {
-  const FeedUseView({super.key});
+  final int initialTabIndex;
+  const FeedUseView({super.key, this.initialTabIndex = 0});
 
   @override
   State<FeedUseView> createState() => _FeedUseViewState();
@@ -22,7 +23,11 @@ class _FeedUseViewState extends State<FeedUseView>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(
+      length: 2,
+      vsync: this,
+      initialIndex: widget.initialTabIndex,
+    );
   }
 
   @override

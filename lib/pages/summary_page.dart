@@ -321,7 +321,11 @@ class _SummaryPageState extends State<SummaryPage> {
         shape: const CircleBorder(),
         backgroundColor: Colors.blue,
         onPressed: () {
-          Get.to(() => const FeedUseView());
+          if (widget.isMorta) {
+            Get.to(() => const FeedUseView(initialTabIndex: 1));
+          } else {
+            Get.to(() => const FeedUseView());
+          }
         },
         child: const Icon(Icons.add, color: Colors.white),
       ),

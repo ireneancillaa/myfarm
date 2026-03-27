@@ -63,7 +63,13 @@ class _HistoryPageState extends State<HistoryPage> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Get.off(() => FeedUseView()),
+          onPressed: () {
+            if (widget.isMorta) {
+              Get.off(() => const FeedUseView(initialTabIndex: 1));
+            } else {
+              Get.off(() => const FeedUseView());
+            }
+          },
         ),
         actions: [
           Builder(
