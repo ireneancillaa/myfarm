@@ -40,7 +40,7 @@ class _SummaryPageState extends State<SummaryPage> {
       backgroundColor: Colors.grey.shade100,
       appBar: AppBar(
         titleSpacing: 0,
-        backgroundColor: Colors.blue,
+        backgroundColor: Color(0xFF6B4AC3),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
@@ -319,7 +319,7 @@ class _SummaryPageState extends State<SummaryPage> {
       ),
       floatingActionButton: FloatingActionButton(
         shape: const CircleBorder(),
-        backgroundColor: Colors.blue,
+        backgroundColor: Color(0xFF6B4AC3),
         onPressed: () {
           if (widget.isMorta) {
             Get.to(() => const FeedUseView(initialTabIndex: 1));
