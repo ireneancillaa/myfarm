@@ -78,7 +78,6 @@ class _HistoryPageState extends State<HistoryPage> {
                   ? (mortaCtrl!.canDeleteDraft)
                   : (feedDraftCtrl!.canDeleteDraft);
               final isActive = draftHistory.isNotEmpty && canDelete;
-
               return IconButton(
                 icon: Icon(
                   Icons.delete,
@@ -117,145 +116,149 @@ class _HistoryPageState extends State<HistoryPage> {
       ),
       body: draftHistory.isEmpty
           ? const Center(child: Text('Tidak ada data history'))
-          : Column(
-              children: [
-                if (widget.isMorta)
-                  RichText(
-                    text: TextSpan(
-                      style: const TextStyle(fontSize: 15, color: Colors.black),
-                      children: [
-                        const TextSpan(text: 'Total '),
-                        TextSpan(
-                          text: '${totalValue.toInt()}',
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        const TextSpan(text: ' Ekor'),
-                      ],
-                    ),
-                  )
-                else ...[
-                  RichText(
-                    text: TextSpan(
-                      style: const TextStyle(fontSize: 15, color: Colors.black),
-                      children: [
-                        const TextSpan(text: 'Total '),
-                        TextSpan(
-                          text: '$totalTimbang',
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        const TextSpan(text: ' Timbang'),
-                      ],
-                    ),
+          : LayoutBuilder(
+              builder: (context, constraints) {
+                final isWide = constraints.maxWidth > 600;
+                final horizontalPad = isWide ? 48.0 : 12.0;
+                final verticalPad = isWide ? 24.0 : 8.0;
+                return ListView(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: horizontalPad,
+                    vertical: verticalPad,
                   ),
-                  const SizedBox(height: 8),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          '$labelQty ',
-                          style: const TextStyle(color: Colors.black54),
-                        ),
-                        Text(
-                          totalValue.toStringAsFixed(1),
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-                if (draftHistory.isNotEmpty)
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 12.0),
-                    child: Divider(thickness: 1),
-                  ),
-                if (draftHistory.isNotEmpty) ...[
-                  ...draftHistory.asMap().entries.map((entry) {
-                    final idx = entry.key;
-                    final item = entry.value;
-                    final isLast = idx == draftHistory.length - 1;
-                    return Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12.0,
-                            vertical: 4,
+                  children: [
+                    if (widget.isMorta)
+                      RichText(
+                        text: TextSpan(
+                          style: const TextStyle(
+                            fontSize: 15,
+                            color: Colors.black,
                           ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Row(
+                          children: [
+                            const TextSpan(text: 'Total '),
+                            TextSpan(
+                              text: '${totalValue.toInt()}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const TextSpan(text: ' Ekor'),
+                          ],
+                        ),
+                      )
+                    else ...[
+                      RichText(
+                        text: TextSpan(
+                          style: const TextStyle(
+                            fontSize: 15,
+                            color: Colors.black,
+                          ),
+                          children: [
+                            const TextSpan(text: 'Total '),
+                            TextSpan(
+                              text: '$totalTimbang',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const TextSpan(text: ' Timbang'),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            '$labelQty ',
+                            style: const TextStyle(color: Colors.black54),
+                          ),
+                          Text(
+                            totalValue.toStringAsFixed(1),
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                    ],
+                    if (draftHistory.isNotEmpty) const Divider(thickness: 1),
+                    if (draftHistory.isNotEmpty) ...[
+                      ...draftHistory.asMap().entries.map((entry) {
+                        final idx = entry.key;
+                        final item = entry.value;
+                        final isLast = idx == draftHistory.length - 1;
+                        return Column(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 4),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
+                                  Row(
+                                    children: [
+                                      Text(
+                                        '${widget.isMorta ? 'Morta' : 'Feed'} ${idx + 1}',
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                   Text(
-                                    '${widget.isMorta ? 'Morta' : 'Feed'} ${idx + 1}',
+                                    _formatDateTime(item['timestamp']),
                                     style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black54,
+                                      fontSize: 13,
                                     ),
                                   ),
                                 ],
                               ),
-                              Text(
-                                _formatDateTime(item['timestamp']),
-                                style: const TextStyle(
-                                  color: Colors.black54,
-                                  fontSize: 13,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                          child: Row(
-                            children: [
-                              Text(
-                                '$labelQty ',
-                                style: const TextStyle(color: Colors.black54),
-                              ),
-                              Text(
-                                widget.isMorta
-                                    ? (double.tryParse(
-                                            item[valueKey]?.toString() ?? '0',
-                                          )?.toInt().toString() ??
-                                          '0')
-                                    : (double.tryParse(
-                                            item[valueKey]?.toString() ?? '0',
-                                          )?.toStringAsFixed(1) ??
-                                          '0.0'),
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              if (!widget.isMorta)
+                            ),
+                            Row(
+                              children: [
                                 Text(
-                                  '$labelCode ',
+                                  '$labelQty ',
                                   style: const TextStyle(color: Colors.black54),
                                 ),
-                              Text(
-                                item[codeKey] ?? '-',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
+                                Text(
+                                  widget.isMorta
+                                      ? (double.tryParse(
+                                              item[valueKey]?.toString() ?? '0',
+                                            )?.toInt().toString() ??
+                                            '0')
+                                      : (double.tryParse(
+                                              item[valueKey]?.toString() ?? '0',
+                                            )?.toStringAsFixed(1) ??
+                                            '0.0'),
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        if (!isLast)
-                          const Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 12.0),
-                            child: Divider(thickness: 1),
-                          ),
-                      ],
-                    );
-                  }),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 12.0),
-                    child: Divider(thickness: 1),
-                  ),
-                ],
-              ],
+                                const SizedBox(width: 12),
+                                if (!widget.isMorta)
+                                  Text(
+                                    '$labelCode ',
+                                    style: const TextStyle(
+                                      color: Colors.black54,
+                                    ),
+                                  ),
+                                Text(
+                                  item[codeKey] ?? '-',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            if (!isLast) const Divider(thickness: 1),
+                          ],
+                        );
+                      }),
+                      const Divider(thickness: 1),
+                    ],
+                  ],
+                );
+              },
             ),
       bottomNavigationBar: draftHistory.isNotEmpty
           ? Padding(

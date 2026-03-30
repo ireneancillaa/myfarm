@@ -108,210 +108,228 @@ class _SummaryPageState extends State<SummaryPage> {
           ),
         ],
       ),
-      body: StreamBuilder<List<Map<String, dynamic>>>(
-        stream: widget.isMorta
-            ? historyController.allMortaHistoryStream
-            : historyController.allHistoryStream,
-        builder: (context, snapshot) {
-          final firebaseData = snapshot.data ?? [];
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final isWide = constraints.maxWidth > 600;
+          final horizontalPad = isWide ? 48.0 : 12.0;
+          final verticalPad = isWide ? 24.0 : 8.0;
+          return StreamBuilder<List<Map<String, dynamic>>>(
+            stream: widget.isMorta
+                ? historyController.allMortaHistoryStream
+                : historyController.allHistoryStream,
+            builder: (context, snapshot) {
+              final firebaseData = snapshot.data ?? [];
 
-          final draftData = widget.isMorta
-              ? (mortaCtrl?.draftHistory ?? [])
-              : (feedDraftCtrl?.draftHistory ?? []);
+              final draftData = widget.isMorta
+                  ? (mortaCtrl?.draftHistory ?? [])
+                  : (feedDraftCtrl?.draftHistory ?? []);
 
-          final List<Map<String, dynamic>> combined = [
-            ...firebaseData.map((e) => {...e, 'isSubmitted': true}),
-            ...draftData.map((e) => {...e, 'isSubmitted': false}),
-          ];
+              final List<Map<String, dynamic>> combined = [
+                ...firebaseData.map((e) => {...e, 'isSubmitted': true}),
+                ...draftData.map((e) => {...e, 'isSubmitted': false}),
+              ];
 
-          combined.sort((a, b) {
-            final tA = DateTime.tryParse(a['timestamp'] ?? '') ?? DateTime(0);
-            final tB = DateTime.tryParse(b['timestamp'] ?? '') ?? DateTime(0);
-            return tB.compareTo(tA);
-          });
+              combined.sort((a, b) {
+                final tA =
+                    DateTime.tryParse(a['timestamp'] ?? '') ?? DateTime(0);
+                final tB =
+                    DateTime.tryParse(b['timestamp'] ?? '') ?? DateTime(0);
+                return tB.compareTo(tA);
+              });
 
-          if (combined.isEmpty) {
-            return const Center(child: Text("Belum ada data"));
-          }
-
-          final Map<String, List<Map<String, dynamic>>> grouped = {};
-          for (final item in combined) {
-            final dtStr = item['timestamp'] as String?;
-            if (dtStr == null) continue;
-            String dateOnly = dtStr;
-            try {
-              final dt = DateTime.parse(dtStr);
-              dateOnly =
-                  '${dt.year}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')}';
-            } catch (_) {}
-
-            if (!grouped.containsKey(dateOnly)) {
-              grouped[dateOnly] = [];
-            }
-            grouped[dateOnly]!.add(item);
-          }
-
-          final sortedDates = grouped.keys.toList()
-            ..sort((a, b) => b.compareTo(a));
-
-          return ListView.builder(
-            padding: const EdgeInsets.all(12),
-            itemCount: sortedDates.length,
-            itemBuilder: (context, index) {
-              final dateKey = sortedDates[index];
-              final items = grouped[dateKey]!;
-              final isSubmitted = items.every((e) => e['isSubmitted'] == true);
-
-              double totalNum = 0;
-              for (final it in items) {
-                totalNum += double.tryParse(_getValue(it)) ?? 0;
+              if (combined.isEmpty) {
+                return const Center(child: Text("Belum ada data"));
               }
-              final totalStr = widget.isMorta
-                  ? totalNum.toInt().toString()
-                  : totalNum.toStringAsFixed(1);
 
-              final firstItemTimestamp = items.last['timestamp'];
-              String displayTitle = dateKey;
-              if (firstItemTimestamp != null) {
+              final Map<String, List<Map<String, dynamic>>> grouped = {};
+              for (final item in combined) {
+                final dtStr = item['timestamp'] as String?;
+                if (dtStr == null) continue;
+                String dateOnly = dtStr;
                 try {
-                  final dt = DateTime.parse(firstItemTimestamp.toString());
-                  displayTitle =
-                      '${dt.year}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')} '
-                      '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}:${dt.second.toString().padLeft(2, '0')}';
+                  final dt = DateTime.parse(dtStr);
+                  dateOnly =
+                      '${dt.year}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')}';
                 } catch (_) {}
+
+                if (!grouped.containsKey(dateOnly)) {
+                  grouped[dateOnly] = [];
+                }
+                grouped[dateOnly]!.add(item);
               }
 
-              return Card(
-                elevation: 1,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                margin: const EdgeInsets.only(bottom: 12),
-                color: Colors.white,
-                child: ExpansionTile(
-                  shape: const RoundedRectangleBorder(side: BorderSide.none),
-                  collapsedShape: const RoundedRectangleBorder(
-                    side: BorderSide.none,
-                  ),
-                  title: Row(
-                    children: [
-                      Text(
-                        displayTitle,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 13,
-                          color: Colors.black87,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Icon(
-                        isSubmitted ? Icons.check_circle : Icons.remove_circle,
-                        color: isSubmitted ? Colors.green : Colors.red,
-                        size: 20,
-                      ),
-                      const Spacer(),
-                      IconButton(
-                        icon: const Icon(
-                          Icons.picture_as_pdf,
-                          color: Colors.black,
-                          size: 20,
-                        ),
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
-                        onPressed: () async {
-                          try {
-                            final pdfBytes =
-                                await PdfService.generateSummaryPdf(
-                                  isMorta: widget.isMorta,
-                                  displayTitle: displayTitle,
-                                  items: items,
-                                  isSubmitted: isSubmitted,
-                                );
+              final sortedDates = grouped.keys.toList()
+                ..sort((a, b) => b.compareTo(a));
 
-                            Get.to(
-                              () => PdfPreviewPage(
-                                title: displayTitle,
-                                pdfBytes: pdfBytes,
-                              ),
-                            );
-                          } catch (e) {
-                            Get.snackbar(
-                              'Gagal Memuat PDF',
-                              'Pastikan Anda sudah menghentikan (Stop) lalu nge-Run ulang aplikasinya.\nError: $e',
-                              backgroundColor: Colors.red,
-                              colorText: Colors.white,
-                              duration: const Duration(seconds: 5),
-                            );
-                          }
-                        },
+              return ListView.builder(
+                padding: EdgeInsets.symmetric(
+                  horizontal: horizontalPad,
+                  vertical: verticalPad,
+                ),
+                itemCount: sortedDates.length,
+                itemBuilder: (context, index) {
+                  final dateKey = sortedDates[index];
+                  final items = grouped[dateKey]!;
+                  final isSubmitted = items.every(
+                    (e) => e['isSubmitted'] == true,
+                  );
+
+                  double totalNum = 0;
+                  for (final it in items) {
+                    totalNum += double.tryParse(_getValue(it)) ?? 0;
+                  }
+                  final totalStr = widget.isMorta
+                      ? totalNum.toInt().toString()
+                      : totalNum.toStringAsFixed(1);
+
+                  final firstItemTimestamp = items.last['timestamp'];
+                  String displayTitle = dateKey;
+                  if (firstItemTimestamp != null) {
+                    try {
+                      final dt = DateTime.parse(firstItemTimestamp.toString());
+                      displayTitle =
+                          '${dt.year}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')} '
+                          '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}:${dt.second.toString().padLeft(2, '0')}';
+                    } catch (_) {}
+                  }
+
+                  return Card(
+                    elevation: 1,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    margin: const EdgeInsets.only(bottom: 12),
+                    color: Colors.white,
+                    child: ExpansionTile(
+                      shape: const RoundedRectangleBorder(
+                        side: BorderSide.none,
                       ),
-                    ],
-                  ),
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      collapsedShape: const RoundedRectangleBorder(
+                        side: BorderSide.none,
+                      ),
+                      title: Row(
                         children: [
                           Text(
-                            widget.isMorta
-                                ? "EKOR : $totalStr"
-                                : "KILO : $totalStr",
+                            displayTitle,
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
-                              fontSize: 14,
+                              fontSize: 13,
+                              color: Colors.black87,
                             ),
                           ),
-                          const Divider(height: 24, thickness: 1),
-                          ...items.asMap().entries.map((entry) {
-                            final idx = entry.key;
-                            final it = entry.value;
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 8.0),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey.shade200,
-                                      shape: BoxShape.circle,
-                                    ),
-                                    padding: const EdgeInsets.all(8),
-                                    width: 32,
-                                    height: 32,
-                                    alignment: Alignment.center,
-                                    child: Text(
-                                      "${idx + 1}",
-                                      style: const TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
+                          const SizedBox(width: 8),
+                          Icon(
+                            isSubmitted
+                                ? Icons.check_circle
+                                : Icons.remove_circle,
+                            color: isSubmitted ? Colors.green : Colors.red,
+                            size: 20,
+                          ),
+                          const Spacer(),
+                          IconButton(
+                            icon: const Icon(
+                              Icons.picture_as_pdf,
+                              color: Colors.black,
+                              size: 20,
+                            ),
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                            onPressed: () async {
+                              try {
+                                final pdfBytes =
+                                    await PdfService.generateSummaryPdf(
+                                      isMorta: widget.isMorta,
+                                      displayTitle: displayTitle,
+                                      items: items,
+                                      isSubmitted: isSubmitted,
+                                    );
+
+                                Get.to(
+                                  () => PdfPreviewPage(
+                                    title: displayTitle,
+                                    pdfBytes: pdfBytes,
                                   ),
-                                  const SizedBox(width: 16),
-                                  Text(
-                                    _getCode(it),
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.black87,
-                                    ),
-                                  ),
-                                  const Spacer(),
-                                  Text(
-                                    "${_getValue(it)} ${widget.isMorta ? 'Ekor' : 'KG'}",
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 13,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          }),
+                                );
+                              } catch (e) {
+                                Get.snackbar(
+                                  'Gagal Memuat PDF',
+                                  'Pastikan Anda sudah menghentikan (Stop) lalu nge-Run ulang aplikasinya.\nError: $e',
+                                  backgroundColor: Colors.red,
+                                  colorText: Colors.white,
+                                  duration: const Duration(seconds: 5),
+                                );
+                              }
+                            },
+                          ),
                         ],
                       ),
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                widget.isMorta
+                                    ? "EKOR : $totalStr"
+                                    : "KILO : $totalStr",
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              const Divider(height: 24, thickness: 1),
+                              ...items.asMap().entries.map((entry) {
+                                final idx = entry.key;
+                                final it = entry.value;
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 8.0),
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey.shade200,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        padding: const EdgeInsets.all(8),
+                                        width: 32,
+                                        height: 32,
+                                        alignment: Alignment.center,
+                                        child: Text(
+                                          "${idx + 1}",
+                                          style: const TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 16),
+                                      Text(
+                                        _getCode(it),
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.black87,
+                                        ),
+                                      ),
+                                      const Spacer(),
+                                      Text(
+                                        "${_getValue(it)} ${widget.isMorta ? 'Ekor' : 'KG'}",
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 13,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              }),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  );
+                },
               );
             },
           );

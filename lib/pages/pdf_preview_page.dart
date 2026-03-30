@@ -31,9 +31,14 @@ class _PdfPreviewPageState extends State<PdfPreviewPage> {
   Future<void> loadPDF() async {
     try {
       final dir = await getApplicationDocumentsDirectory();
-      final file = File('${dir.path}/preview_${DateTime.now().millisecondsSinceEpoch}.pdf');
-      await file.writeAsBytes(widget.pdfBytes.buffer.asUint8List(), flush: true);
-      
+      final file = File(
+        '${dir.path}/preview_${DateTime.now().millisecondsSinceEpoch}.pdf',
+      );
+      await file.writeAsBytes(
+        widget.pdfBytes.buffer.asUint8List(),
+        flush: true,
+      );
+
       if (mounted) {
         setState(() => localPath = file.path);
       }
@@ -54,25 +59,41 @@ class _PdfPreviewPageState extends State<PdfPreviewPage> {
           IconButton(
             icon: const Icon(Icons.share),
             onPressed: () async {
-              await Printing.sharePdf(bytes: widget.pdfBytes, filename: '${widget.title}.pdf');
+              await Printing.sharePdf(
+                bytes: widget.pdfBytes,
+                filename: '${widget.title}.pdf',
+              );
             },
           ),
         ],
       ),
       backgroundColor: Colors.grey.shade200,
-      body: localPath != null
-          ? PDFView(
-              filePath: localPath!,
-              enableSwipe: true,
-              swipeHorizontal: true,
-              autoSpacing: false,
-              pageSnap: true,
-              onRender: (pages) => debugPrint('Rendered $pages pages'),
-              onError: (error) => debugPrint(error.toString()),
-              onPageError: (page, error) => debugPrint('Error on page $page: $error'),
-            )
-          : const Center(child: CircularProgressIndicator()),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final isWide = constraints.maxWidth > 600;
+          final horizontalPad = isWide ? 48.0 : 12.0;
+          final verticalPad = isWide ? 24.0 : 8.0;
+          return Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: horizontalPad,
+              vertical: verticalPad,
+            ),
+            child: localPath != null
+                ? PDFView(
+                    filePath: localPath!,
+                    enableSwipe: true,
+                    swipeHorizontal: true,
+                    autoSpacing: false,
+                    pageSnap: true,
+                    onRender: (pages) => debugPrint('Rendered $pages pages'),
+                    onError: (error) => debugPrint(error.toString()),
+                    onPageError: (page, error) =>
+                        debugPrint('Error on page $page: $error'),
+                  )
+                : const Center(child: CircularProgressIndicator()),
+          );
+        },
+      ),
     );
   }
 }
-
